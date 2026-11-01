@@ -1,0 +1,3 @@
+import {env} from "cloudflare:workers";
+export async function matches(value:string){const key=(env as typeof env & {ADMIN_KEY?:string}).ADMIN_KEY;if(!key||!value)return false;const a=new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(key)));const b=new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(value)));let d=0;for(let i=0;i<a.length;i++)d|=a[i]^b[i];return d===0}
+export async function isAdmin(req:Request){const cookie=req.headers.get('cookie')||'';return matches(cookie.split(';').map(x=>x.trim()).find(x=>x.startsWith('eid_admin='))?.slice(10)||'')}

@@ -1,0 +1,2 @@
+import {sqliteTable,text,integer} from "drizzle-orm/sqlite-core";
+export const registrations=sqliteTable("registrations",{id:text("id").primaryKey(),contact:text("contact").notNull(),phone:text("phone").notNull(),guests:text("guests").notNull(),total:integer("total").notNull(),receipt:text("receipt").notNull(),mime:text("mime").notNull(),status:text("status").notNull().default("pending"),attendance:text("attendance").notNull().default("[]"),created:text("created").notNull()});

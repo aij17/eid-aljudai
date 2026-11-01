@@ -1,0 +1,3 @@
+import {matches} from "../security";
+export async function POST(req:Request){if(req.headers.get('origin')!==new URL(req.url).origin)return new Response(null,{status:403});const {key}=await req.json() as {key?:unknown};if(typeof key!=='string'||!await matches(key))return Response.json({error:"رمز الدخول غير صحيح"},{status:401});return Response.json({ok:true},{headers:{'Set-Cookie':`eid_admin=${key}; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=28800`}})}
+export async function DELETE(){return Response.json({ok:true},{headers:{'Set-Cookie':'eid_admin=; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=0'}})}
