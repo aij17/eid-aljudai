@@ -1,6 +1,7 @@
 import {env} from "cloudflare:workers";
 import {isAdmin} from "../security";
 import {notifyRegistration} from "../../../lib/notifications";
+import {confirmRegistrationWhatsapp} from "../../../lib/whatsapp";
 const prices:Record<string,number>={married:300,university:200,school:100};
 export async function POST(req:Request){
  if(req.headers.get("origin")!==new URL(req.url).origin)return Response.json({error:"طلب غير مسموح"},{status:403});
@@ -12,8 +13,8 @@ export async function POST(req:Request){
  const id=crypto.randomUUID(),key=`receipts/${id}`;const total=guests.reduce((s,g)=>s+prices[g.category],0);
  await env.BUCKET!.put(key,bytes,{httpMetadata:{contentType:file.type}});
  try{await env.DB!.prepare("INSERT INTO registrations (id,contact,phone,guests,total,receipt,mime,status,attendance,created,contact_consent) VALUES (?,?,?,?,?,?,?,'pending','[]',?,?)").bind(id,contact,phone,JSON.stringify(guests.map(g=>({name:g.name.trim(),category:g.category}))),total,key,file.type,new Date().toISOString(),f.get('contactConsent')==='yes'?1:0).run()}catch(e){await env.BUCKET!.delete(key);throw e}
- try{await notifyRegistration(id,new URL(req.url).origin)}catch{console.error(JSON.stringify({event:'registration_notification_failed',id}))}
+ try{await notifyRegistration(id,new URL(req.url).origin,true)}catch{console.error(JSON.stringify({event:'registration_notification_failed',id}))}
  return Response.json({id,total},{status:201});
  }catch{return Response.json({error:"تعذر حفظ التسجيل، حاولي مرة أخرى"},{status:500})}}
 export async function GET(req:Request){if(!await isAdmin(req))return new Response(null,{status:401});const rows=await env.DB!.prepare("SELECT * FROM registrations ORDER BY created DESC").all();return Response.json(rows.results,{headers:{"Cache-Control":"no-store"}})}
-export async function PATCH(req:Request){if(!await isAdmin(req)||req.headers.get('origin')!==new URL(req.url).origin)return new Response(null,{status:403});const b=await req.json() as {id:string,status?:string,attendance?:number[]};if(b.status&&['pending','approved','correction'].includes(b.status)){await env.DB!.prepare("UPDATE registrations SET status=? WHERE id=?").bind(b.status,b.id).run()}else if(Array.isArray(b.attendance)&&b.attendance.every((n:unknown)=>Number.isInteger(n)&&Number(n)>=0&&Number(n)<30)){await env.DB!.prepare("UPDATE registrations SET attendance=? WHERE id=?").bind(JSON.stringify([...new Set(b.attendance)]),b.id).run()}else return new Response(null,{status:400});return Response.json({ok:true})}
+export async function PATCH(req:Request){if(!await isAdmin(req)||req.headers.get('origin')!==new URL(req.url).origin)return new Response(null,{status:403});const b=await req.json() as {id:string,status?:string,attendance?:number[]};if(b.status&&['pending','approved','correction'].includes(b.status)){await env.DB!.prepare("UPDATE registrations SET status=? WHERE id=?").bind(b.status,b.id).run();if(b.status==='approved'){try{await confirmRegistrationWhatsapp(b.id)}catch{console.error(JSON.stringify({event:"confirmation_notification_failed",id:b.id}))}}}else if(Array.isArray(b.attendance)&&b.attendance.every((n:unknown)=>Number.isInteger(n)&&Number(n)>=0&&Number(n)<30)){await env.DB!.prepare("UPDATE registrations SET attendance=? WHERE id=?").bind(JSON.stringify([...new Set(b.attendance)]),b.id).run()}else return new Response(null,{status:400});return Response.json({ok:true})}

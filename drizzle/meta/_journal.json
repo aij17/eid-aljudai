@@ -15,6 +15,13 @@
       "when": 1793565644756,
       "tag": "0001_lonely_rumiko_fujikawa",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1793604769363,
+      "tag": "0002_petite_barracuda",
+      "breakpoints": true
     }
   ]
 }

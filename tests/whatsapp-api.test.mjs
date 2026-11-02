@@ -1,0 +1,16 @@
+import assert from 'node:assert/strict';
+import {sendTwilioTemplate,sendCallMeBot} from '../lib/whatsapp-api.ts';
+const config={accountSid:'AC'+'a'.repeat(32),authToken:'test-token',from:'whatsapp:+966500000000',templateSid:'HX'+'b'.repeat(32)};
+let calls=0;
+const accepted=async(input,init)=>{calls++;assert.ok(String(input).startsWith('https://api.twilio.com/'));assert.equal(init?.method,'POST');const body=init?.body;assert.equal(body.get('To'),'whatsapp:+966511111111');assert.equal(body.get('ContentSid'),config.templateSid);assert.deepEqual(JSON.parse(body.get('ContentVariables')),{'1':'اختبار'});return Response.json({sid:'SM-test'})};
+assert.deepEqual(await sendTwilioTemplate(config,'+966511111111',{'1':'اختبار'},accepted),{status:'accepted',providerId:'SM-test'});
+assert.equal(calls,1);
+assert.deepEqual(await sendTwilioTemplate({...config,authToken:''},'+966511111111',{},accepted),{status:'disabled'});assert.equal(calls,1);
+assert.deepEqual(await sendTwilioTemplate(config,'bad-number',{},accepted),{status:'disabled'});assert.equal(calls,1);
+assert.deepEqual(await sendTwilioTemplate(config,'+966511111111',{},async()=>new Response('',{status:400})),{status:'failed'});
+assert.deepEqual(await sendTwilioTemplate(config,'+966511111111',{},async()=>new Response('',{status:503})),{status:'unknown'});
+assert.deepEqual(await sendTwilioTemplate(config,'+966511111111',{},async()=>{throw Error('timeout')}),{status:'unknown'});
+assert.deepEqual(await sendCallMeBot('+966500000000','test','إيصال جديد',async input=>{const url=new URL(String(input));assert.equal(url.hostname,'api.callmebot.com');assert.equal(url.searchParams.get('text'),'إيصال جديد');return new Response('Message added to the queue.')}),{status:'accepted'});
+assert.deepEqual(await sendCallMeBot('+966500000000','test','test',async()=>new Response('ERROR: Invalid API key')),{status:'failed'});
+assert.deepEqual(await sendCallMeBot('+966500000000','test','test',async()=>new Response('unrecognized response')),{status:'unknown'});
+console.log('PASS: WhatsApp templates, recipient validation, missing credentials, provider rejection, ambiguous timeout, personal notification responses');
