@@ -27,7 +27,7 @@ export async function POST(req:Request){
  try{await notifyRegistration(id,new URL(req.url).origin,true)}catch{console.error(JSON.stringify({event:'registration_notification_failed',id}))}
  return Response.json({id,total,accessToken},{status:201,headers:{"Cache-Control":"no-store"}});
  }catch{return Response.json({error:"تعذر حفظ التسجيل، حاولي مرة أخرى"},{status:500})}}
-export async function GET(req:Request){if(!await isAdmin(req))return new Response(null,{status:401});const rows=await env.DB!.prepare("SELECT r.*,a.share_token,c.guests AS proposed_guests,c.total AS proposed_total FROM registrations r LEFT JOIN registration_access a ON a.registration_id=r.id LEFT JOIN registration_changes c ON c.registration_id=r.id ORDER BY r.created DESC").all();return Response.json(rows.results,{headers:{"Cache-Control":"no-store"}})}
+export async function GET(req:Request){if(!await isAdmin(req))return new Response(null,{status:401});const rows=await env.DB!.prepare("SELECT r.*,a.share_token,c.guests AS proposed_guests,c.total AS proposed_total,c.receipt AS proposed_receipt FROM registrations r LEFT JOIN registration_access a ON a.registration_id=r.id LEFT JOIN registration_changes c ON c.registration_id=r.id ORDER BY r.created DESC").all();return Response.json(rows.results,{headers:{"Cache-Control":"no-store"}})}
 export async function PATCH(req:Request){
  if(!await isAdmin(req)||req.headers.get('origin')!==new URL(req.url).origin)return new Response(null,{status:403});
  try{const b=await req.json() as {id:string,status?:string,attendance?:number[],action?:string,note?:string};

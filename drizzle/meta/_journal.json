@@ -57,6 +57,13 @@
       "when": 1793796119484,
       "tag": "0007_needy_meltdown",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "6",
+      "when": 1793816839145,
+      "tag": "0008_jittery_firestar",
+      "breakpoints": true
     }
   ]
 }

@@ -8,4 +8,4 @@ export const fileChunks=sqliteTable('file_chunks',{fileKey:text('file_key').notN
 export const attendeeNames=sqliteTable('attendee_names',{nameKey:text('name_key').primaryKey(),registrationId:text('registration_id').notNull()});
 
 export const registrationAccess=sqliteTable("registration_access",{registrationId:text("registration_id").primaryKey(),tokenHash:text("token_hash").notNull().unique(),shareToken:text("share_token")});
-export const registrationChanges=sqliteTable("registration_changes",{registrationId:text("registration_id").primaryKey(),guests:text("guests").notNull(),total:integer("total").notNull(),created:text("created").notNull()});
+export const registrationChanges=sqliteTable("registration_changes",{registrationId:text("registration_id").primaryKey(),guests:text("guests").notNull(),total:integer("total").notNull(),created:text("created").notNull(),receipt:text("receipt"),mime:text("mime")});
