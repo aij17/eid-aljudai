@@ -1,0 +1,1 @@
+ALTER TABLE `registration_access` ADD `share_token` text;

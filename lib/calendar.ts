@@ -9,7 +9,7 @@ export function hijriToGregorian(year:number,month:number,day:number){
  return new Date(lo*DAY);
 }
 export const EVENTS=[{key:'ramadan',label:'على رمضان',hijri:'١ رمضان ١٤٤٨',date:hijriToGregorian(1448,9,1),icon:'☾'},{key:'eid',label:'على عيد الفطر',hijri:'١ شوال ١٤٤٨',date:hijriToGregorian(1448,10,1),icon:'✦'},{key:'gathering',label:'على لمّتنا · رابع العيد',hijri:'٤ شوال ١٤٤٨',date:hijriToGregorian(1448,10,4),icon:'♡'}];
-export function remainingDays(date:Date,now:number){return Math.max(0,Math.floor(date.getTime()/DAY)-Math.floor((now+MAKKAH_OFFSET)/DAY));}
+export function remainingDays(date:Date,now:number){return Math.max(0,Math.floor((date.getTime()-MAKKAH_OFFSET-now)/DAY));}
 export function eventPhase(date:Date,now:number){const diff=Math.floor(date.getTime()/DAY)-Math.floor((now+MAKKAH_OFFSET)/DAY);return diff>0?'upcoming':diff===0?'today':'past'}
 export function gregorianLabel(date:Date){return new Intl.DateTimeFormat('ar-SA-u-ca-gregory',{weekday:'long',day:'numeric',month:'long',year:'numeric',timeZone:'UTC'}).format(date)}
 export const gatheringDateLabel=gregorianLabel(EVENTS[2].date);
