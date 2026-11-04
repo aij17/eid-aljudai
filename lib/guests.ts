@@ -1,0 +1,5 @@
+export const categories=[{key:'married',label:'متزوجات',price:300,color:'#861f41'},{key:'university',label:'جامعيات',price:200,color:'#ab8550'},{key:'school',label:'ثانوي ومتوسط',price:100,color:'#c68d9e'},{key:'child',label:'أطفال',price:0,color:'#b9b1a7'}] as const;
+export type Guest={name:string,category:string};
+export function guestCounts(guests:Guest[]){return Object.fromEntries(categories.map(c=>[c.key,guests.filter(g=>g.category===c.key).length])) as Record<string,number>}
+export function guestSummary(guests:Guest[]){const counts=guestCounts(guests);return categories.map(c=>`${c.label}: ${counts[c.key]}`).join('، ')}
+export function confirmationText(contact:string,guests:Guest[],total:number,date:string){return `مرحبًا ${contact} 🌿\nتم اعتماد تحويلكم وتأكيد حضوركم في عيد أبناء إبراهيم علي الجديعي.\n\nتفاصيل التسجيل:\n${categories.map(c=>`${c.label}: ${guestCounts(guests)[c.key]}`).join('\n')}\nإجمالي المبلغ: ${total.toLocaleString('ar-SA')} ريال.\n\nننتظركم بكل حب رابع أيام عيد الفطر، ${date}، في منتجع الوفاء الريفي.\nالموعد وفق تقويم أم القرى ويتبع الإعلان الرسمي للهلال.\nبلمّتكم تكتمل فرحتنا، وكل عام وأنتم بخير 🤍`}
