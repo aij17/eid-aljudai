@@ -1,0 +1,4 @@
+import {env} from 'cloudflare:workers';
+import {normalizedGuestName,type Guest} from './guests';
+export function nameReservations(id:string,guests:Guest[]){return guests.map(g=>env.DB!.prepare('INSERT INTO attendee_names (name_key,registration_id) VALUES (?,?)').bind(normalizedGuestName(g.name),id))}
+export async function conflictingName(guests:Guest[],exceptId?:string){const wanted=new Set(guests.map(g=>normalizedGuestName(g.name)));const rows=await env.DB!.prepare("SELECT id,guests FROM registrations WHERE lifecycle='active'").all<{id:string,guests:string}>();for(const row of rows.results){if(row.id===exceptId)continue;for(const g of JSON.parse(row.guests) as Guest[])if(wanted.has(normalizedGuestName(g.name)))return guests.find(n=>normalizedGuestName(n.name)===normalizedGuestName(g.name))!.name}return null}

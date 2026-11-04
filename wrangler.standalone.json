@@ -1,0 +1,25 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "eid-aljudai",
+  "account_id": "18501bdb8ea446e6645ba1a1f01f1267",
+  "main": "./worker/index.ts",
+  "compatibility_date": "2026-11-04",
+  "compatibility_flags": [
+    "nodejs_compat"
+  ],
+  "workers_dev": true,
+  "observability": {
+    "enabled": true,
+    "traces": {
+      "enabled": true
+    }
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "eid-aljudai-db",
+      "database_id": "822242d9-0cdd-4cf2-825c-07fef5fe4c77",
+      "migrations_dir": "drizzle"
+    }
+  ]
+}

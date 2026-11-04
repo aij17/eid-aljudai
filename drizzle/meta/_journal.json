@@ -29,6 +29,20 @@
       "when": 1793605923479,
       "tag": "0003_melodic_killraven",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "6",
+      "when": 1793778046101,
+      "tag": "0004_cheerful_boomerang",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "6",
+      "when": 1793778382809,
+      "tag": "0005_wet_ben_grimm",
+      "breakpoints": true
     }
   ]
 }

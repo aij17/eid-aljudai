@@ -1,0 +1,4 @@
+'use client';
+import {useState} from 'react';
+import {saudiLocalPhone} from '../lib/saudi-phone';
+export default function SaudiPhoneInput({name,value,onChange,required=false}:{name?:string,value?:string,onChange?:(value:string)=>void,required?:boolean}){const [local,setLocal]=useState('');const current=value===undefined?local:value;function change(v:string){if(onChange)onChange(v);else setLocal(v)}return <span className="saudi-phone-input" dir="ltr"><span className="country-code" aria-label="السعودية">🇸🇦 +966</span><input name={name} type="tel" inputMode="tel" autoComplete="tel-national" placeholder="05xxxxxxxx" required={required} maxLength={22} value={current} onChange={e=>change(e.target.value)} onBlur={()=>{const normalized=saudiLocalPhone(current);if(normalized)change(normalized)}}/></span>}

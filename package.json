@@ -1,5 +1,5 @@
 {
-  "name": "site-creator-vinext-starter",
+  "name": "eid-aljudai",
   "version": "0.1.0",
   "private": true,
   "engines": {
@@ -12,7 +12,11 @@
     "start": "node --import ./scripts/sites-env.mjs ./node_modules/wrangler/bin/wrangler.js dev --config dist/server/wrangler.json --local --persist-to .wrangler/state --ip 127.0.0.1 --inspector-port 0",
     "lint": "eslint . --ignore-pattern dist --ignore-pattern .next",
     "db:generate": "drizzle-kit generate",
-    "test:whatsapp": "node --experimental-strip-types tests/whatsapp-api.test.mjs"
+    "test:whatsapp": "node --experimental-strip-types tests/whatsapp-api.test.mjs",
+    "build:standalone": "node scripts/standalone.mjs build",
+    "dev:standalone": "node scripts/standalone.mjs dev",
+    "deploy:standalone": "wrangler deploy --config dist/server/wrangler.json",
+    "test:phone": "node --experimental-strip-types tests/saudi-phone.test.mjs"
   },
   "dependencies": {
     "@base-ui/react": "^1.7.0",

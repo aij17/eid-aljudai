@@ -1,3 +1,8 @@
-import {sqliteTable,text,integer} from "drizzle-orm/sqlite-core";
+import {sqliteTable,text,integer,blob,primaryKey} from "drizzle-orm/sqlite-core";
 export const registrations=sqliteTable("registrations",{id:text("id").primaryKey(),contact:text("contact").notNull(),phone:text("phone").notNull(),guests:text("guests").notNull(),total:integer("total").notNull(),receipt:text("receipt").notNull(),mime:text("mime").notNull(),status:text("status").notNull().default("pending"),attendance:text("attendance").notNull().default("[]"),adminNotice:text("admin_notice").notNull().default("disabled"),contactConsent:integer("contact_consent").notNull().default(0),adminWhatsappNotice:text("admin_whatsapp_notice").notNull().default("disabled"),confirmationNotice:text("confirmation_notice").notNull().default("disabled"),confirmationProviderId:text("confirmation_provider_id"),lifecycle:text("lifecycle").notNull().default("active"),refundStatus:text("refund_status").notNull().default("not_due"),refundAmount:integer("refund_amount").notNull().default(0),refundNote:text("refund_note"),refundedAt:text("refunded_at"),archivedAt:text("archived_at"),created:text("created").notNull()});
 export const appSettings=sqliteTable("app_settings",{key:text("key").primaryKey(),value:text("value").notNull()});
+
+export const fileObjects=sqliteTable('file_objects',{key:text('key').primaryKey(),mime:text('mime').notNull(),size:integer('size').notNull(),chunks:integer('chunks').notNull()});
+export const fileChunks=sqliteTable('file_chunks',{fileKey:text('file_key').notNull(),part:integer('part').notNull(),data:blob('data',{mode:'buffer'}).notNull()},t=>[primaryKey({columns:[t.fileKey,t.part]})]);
+
+export const attendeeNames=sqliteTable('attendee_names',{nameKey:text('name_key').primaryKey(),registrationId:text('registration_id').notNull()});

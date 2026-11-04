@@ -1,0 +1,10 @@
+import {env} from 'cloudflare:workers';
+const CHUNK=256*1024;
+type StoredFile={body:ReadableStream<Uint8Array>,httpMetadata?:{contentType?:string}};
+interface PrivateFiles {put(key:string,bytes:Uint8Array,options:{httpMetadata:{contentType:string}}):Promise<unknown>;get(key:string):Promise<StoredFile|null>;head(key:string):Promise<unknown|null>;delete(key:string):Promise<unknown>}
+export function privateFiles():PrivateFiles{if(env.BUCKET)return env.BUCKET;const db=env.DB!;return {
+ async put(key,bytes,options){const statements=[db.prepare('DELETE FROM file_chunks WHERE file_key=?').bind(key),db.prepare('INSERT INTO file_objects (key,mime,size,chunks) VALUES (?,?,?,?) ON CONFLICT(key) DO UPDATE SET mime=excluded.mime,size=excluded.size,chunks=excluded.chunks').bind(key,options.httpMetadata.contentType,bytes.byteLength,Math.ceil(bytes.byteLength/CHUNK))];for(let part=0;part*CHUNK<bytes.byteLength;part++){const data=bytes.slice(part*CHUNK,(part+1)*CHUNK);statements.push(db.prepare('INSERT INTO file_chunks (file_key,part,data) VALUES (?,?,?)').bind(key,part,data.buffer))}await db.batch(statements)},
+ async head(key){return db.prepare('SELECT key,size FROM file_objects WHERE key=?').bind(key).first()},
+ async get(key){const meta=await db.prepare('SELECT mime,chunks FROM file_objects WHERE key=?').bind(key).first<{mime:string,chunks:number}>();if(!meta)return null;let part=0;return {httpMetadata:{contentType:meta.mime},body:new ReadableStream<Uint8Array>({async pull(controller){if(part>=meta.chunks){controller.close();return}try{const row=await db.prepare('SELECT data FROM file_chunks WHERE file_key=? AND part=?').bind(key,part++).first<{data:number[]|ArrayBuffer}>();if(!row)throw Error('Incomplete file');controller.enqueue(new Uint8Array(row.data instanceof ArrayBuffer?row.data:row.data));}catch(error){controller.error(error)}}})}},
+ async delete(key){await db.batch([db.prepare('DELETE FROM file_chunks WHERE file_key=?').bind(key),db.prepare('DELETE FROM file_objects WHERE key=?').bind(key)])}
+}}

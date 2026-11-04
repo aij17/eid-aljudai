@@ -1,0 +1,2 @@
+export function saudiLocalPhone(value:string){let s=value.replace(/[٠-٩]/g,d=>String(d.charCodeAt(0)-1632)).replace(/[۰-۹]/g,d=>String(d.charCodeAt(0)-1776)).replace(/[\s()\-]/g,'');if(s.startsWith('00966'))s='0'+s.slice(5);else if(s.startsWith('+966'))s='0'+s.slice(4);else if(s.startsWith('966'))s='0'+s.slice(3);else if(/^5\d{8}$/.test(s))s='0'+s;return /^05\d{8}$/.test(s)?s:''}
+export function saudiInternationalPhone(value:string){const local=saudiLocalPhone(value);return local?'+966'+local.slice(1):''}

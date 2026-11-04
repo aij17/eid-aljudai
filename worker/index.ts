@@ -4,6 +4,8 @@ import type { ConnectorBinding } from "../lib/connector-contract.mjs";
 
 const worker = {
   fetch(request: Request, env: Cloudflare.Env, ctx: ExecutionContext<{ CONNECTORS?: ConnectorBinding }>) {
+    const canonical=(env as Cloudflare.Env & {EID_CANONICAL_ORIGIN?:string}).EID_CANONICAL_ORIGIN;
+    if(canonical){const target=new URL(request.url);const destination=new URL(canonical);if(target.origin!==destination.origin){target.protocol=destination.protocol;target.host=destination.host;if(request.method==='GET'||request.method==='HEAD')return Response.redirect(target.href,302);return Response.json({error:'انتقل إلى الرابط الجديد لإكمال الطلب: '+destination.origin},{status:409});}}
     let binding = ctx.props?.CONNECTORS;
     // Local preview emulates the same request-scoped capability. This branch and
     // the auxiliary service binding are absent from production builds.

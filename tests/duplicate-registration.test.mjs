@@ -1,0 +1,10 @@
+import assert from 'node:assert/strict';import fs from 'node:fs';
+const base='http://127.0.0.1:5199',origin={Origin:base};const key=fs.readFileSync('.dev.vars','utf8').split('\n').find(s=>s.startsWith('ADMIN_KEY=')).slice(10).trim();
+const contact='صاحبة الاختبار '+crypto.randomUUID();
+async function submit(duplicate=false){const f=new FormData();f.set('contact',contact);f.set('phone','٠٥٠١٢٣٤٥٦٧');f.set('guests',JSON.stringify([{name:contact,category:'married'},...(duplicate?[{name:' '+contact+' ',category:'school'}]:[])]));f.set('receipt',new File(['%PDF-1.4\ntest only'], 'test.pdf',{type:'application/pdf'}));return fetch(base+'/api/registrations',{method:'POST',headers:origin,body:f});}
+assert.equal((await submit(true)).status,409);
+const both=await Promise.all([submit(),submit()]);assert.deepEqual(both.map(r=>r.status).sort(),[201,409]);const created=await both.find(r=>r.status===201).json();
+const login=await fetch(base+'/api/login',{method:'POST',headers:{...origin,'Content-Type':'application/json'},body:JSON.stringify({key})});const cookie=login.headers.get('set-cookie').split(';')[0];const headers={...origin,Cookie:cookie,'Content-Type':'application/json'};
+let r=await fetch(base+'/api/registrations',{headers});const rows=await r.json();assert.equal(rows.filter(r=>r.contact===contact&&r.lifecycle==='active').length,1);assert.equal(rows.find(r=>r.id===created.id).phone,'0501234567');
+r=await fetch(base+'/api/registrations',{method:'PATCH',headers,body:JSON.stringify({id:created.id,action:'cancel'})});assert.equal(r.status,200);r=await submit();assert.equal(r.status,201);const replacement=await r.json();r=await fetch(base+'/api/registrations',{method:'PATCH',headers,body:JSON.stringify({id:created.id,action:'restore'})});assert.equal(r.status,409);await fetch(base+'/api/registrations',{method:'PATCH',headers,body:JSON.stringify({id:replacement.id,action:'cancel'})});
+console.log('PASS: duplicate names within booking, concurrent duplicate requests, Saudi phone, cancellation release and conflicting restore');
