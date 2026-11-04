@@ -20,7 +20,7 @@ jobs:
       - run: npx tsc --noEmit
       - run: npm run build:standalone
   deploy:
-    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request' && vars.CLOUDFLARE_DEPLOY_ENABLED == 'true'
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
     needs: check
     runs-on: ubuntu-latest
     environment: production
